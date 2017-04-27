@@ -23,7 +23,8 @@ const EditDetails = ({ organization, updateOrganization, resetOrganization }) =>
     return result;
   };
 
-  const onSubmit = () => {
+  const onSubmit = (values) => {
+    console.log('values', values);
     const patch = collect();
     updateOrganization(patch);
   };
@@ -39,12 +40,12 @@ const EditDetails = ({ organization, updateOrganization, resetOrganization }) =>
     <div>
       <h1>Edit Organization Details</h1>
       <FormContainer onSubmit={onSubmit} onReset={onReset}>
-        <label>
-          Name: <NameInput withRef={(n) => { fields.display_name = n; }} />
+        <label htmlFor="display_name">
+          Name: <input type="text" id="display_name" defaultValue={organization.display_name} />
         </label>
         <br />
-        <label>
-          Description: <DescriptionInput withRef={(n) => { fields.description = n; }} />
+        <label htmlFor="description">
+          Description: <textarea id="description" defaultValue={organization.description} />
         </label>
       </FormContainer>
     </div>

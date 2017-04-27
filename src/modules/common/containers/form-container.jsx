@@ -24,8 +24,22 @@ export default class FormContainer extends React.Component {
     this.hideButtons();
   }
 
+  getFormValues(elements) {
+    // const inputs = elements.filter((element) => { ele})
+    // const inputs = Array.from(elements);
+    const regex = /\D+/g;
+    const inputsFor = Object.keys(elements).filter((htmlFor) => { console.log('htmlFor', htmlFor); return regex.test(htmlFor) });
+    console.log('elements', Array.from(elements).length, inputsFor)
+    // Object.keys(elements).forEach((element) => {
+    //   console.log('element value', element.value)
+    // })
+    // if (Object.keys(elements))
+  }
+
   handleSubmit(e) {
     e.preventDefault();
+    console.log('submit e', e.nativeEvent)
+    const formValues = this.getFormValues(e.nativeEvent.target.elements)
     this.setState({ submitting: true });
     this.props.onSubmit();
     this.hideButtons();
@@ -41,14 +55,13 @@ export default class FormContainer extends React.Component {
 
   render() {
     return (
-      <form className="form" onChange={this.handleChange}>
+      <form className="form" onChange={this.handleChange} onSubmit={this.handleSubmit}>
         {this.props.children}
         {this.state.show &&
           <div>
             <button
               type="submit"
               disabled={this.props.disabledSubmit || this.state.submitting}
-              onClick={this.handleSubmit}
             >
               {this.props.submitLabel}
             </button>
