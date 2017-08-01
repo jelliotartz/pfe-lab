@@ -1,30 +1,43 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { IndexLink, Link } from 'react-router';
+import { config } from '../../../constants/config';
 
-const OrganizationLayout = ({ children, navItems, organizationId }) => (
+const OrganizationLayout = ({ children, navItems, organizationSlug, organizationId }) => (
   <div className="organization-layout">
     <nav className="organization-layout__nav">
       <ul className="nav-list">
         <li><div className="nav-list-header">Organization #{organizationId}</div></li>
         <li>
-          <Link
-            to={`/organizations/${organizationId}`}
+          <a
             className="view-org-button"
+            href={`${config.zooniverseURL}/organizations/${organizationSlug}`}
+            rel="noopener noreferrer"
+            target="_blank"
           >
             View Organization
-          </Link>
+          </a>
         </li>
-        {navItems.map(item => (
-          <li key={item.label}>
-            <Link
-              to={`/organizations/${organizationId}/${item.to}`}
-              className="nav-list__item"
-              activeClassName="active"
-            >
-              {item.label}
-            </Link>
-          </li>
-        ))}
+        {navItems.map((item, index) => {
+          let LinkType;
+          let linkTo;
+          if (index === 0) {
+            LinkType = IndexLink;
+            linkTo = '';
+          } else {
+            LinkType = Link;
+            linkTo = item.to;
+          }
+          return (
+            <li key={item.label}>
+              <LinkType
+                to={`/organizations/${organizationId}/${linkTo}`}
+                className="nav-list__item"
+                activeClassName="active"
+              >
+                {item.label}
+              </LinkType>
+            </li>);
+        })}
       </ul>
     </nav>
 
@@ -36,6 +49,7 @@ OrganizationLayout.propTypes = {
   children: React.PropTypes.node,
   navItems: React.PropTypes.arrayOf(React.PropTypes.object),
   organizationId: React.PropTypes.string,
+  organizationSlug: React.PropTypes.string,
 };
 
 OrganizationLayout.defaultProps = {
@@ -47,6 +61,7 @@ OrganizationLayout.defaultProps = {
     { to: 'projects', label: 'Projects' },
   ],
   organizationId: '',
+  organizationSlug: '',
 };
 
 export default OrganizationLayout;

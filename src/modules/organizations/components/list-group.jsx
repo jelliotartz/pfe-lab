@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
+import { config } from '../../../constants/config';
 
 import { organizationsAvatarsShape, organizationsShape } from '../model';
 
@@ -34,10 +35,10 @@ const ListGroup = ({ organizations, organizationsAvatars, showOwnerName, title }
                     <small>Edit</small>
                   </span>
                 </Link>
-                <Link to={`/organizations/${organization.slug}`} className="organizations-list__icon organizations-list--action">
+                <a href={`${config.zooniverseURL}/organizations/${organization.slug}`} className="organizations-list__icon organizations-list--action">
                   <i className="fa fa-hand-o-right fa-fw" />
                   <small>View</small>
-                </Link>
+                </a>
               </div>
             </li>
           );
@@ -59,4 +60,3 @@ ListGroup.propTypes = {
 };
 
 export default ListGroup;
-

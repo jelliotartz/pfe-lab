@@ -51,6 +51,7 @@ class OrganizationContainer extends React.Component {
       return;
     }
 
+
     apiClient.type('organizations').get(id.toString(), { include: ['avatar', 'background'] })
       .then((org) => {
         this.props.dispatch(setCurrentOrganization(org));
@@ -98,7 +99,7 @@ class OrganizationContainer extends React.Component {
     );
 
     return (
-      <OrganizationLayout organizationId={organizationId}>
+      <OrganizationLayout organizationId={organizationId} organizationSlug={organization ? organization.slug : ''}>
         {wrappedChildren}
       </OrganizationLayout>
     );
