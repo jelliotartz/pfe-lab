@@ -14,25 +14,52 @@ class EditDetailsContainer extends React.Component {
     this.fetchAvatar = this.fetchAvatar.bind(this);
     this.fetchBackground = this.fetchBackground.bind(this);
     this.handleMediaChange = this.handleMediaChange.bind(this);
+
+    this.state = {
+      updatingImage: false
+    }
   }
 
-  componentDidMount() {
-    if (this.props.organization) {
+  componentWillMount() {
+    if (this.props.organization && this.state.updatingImage) {
       this.fetchAvatar(this.props.organization);
       this.fetchBackground(this.props.organization);
+      this.setState({updatingImage: false})
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.organization !== nextProps.organization) {
+    if (this.props.organization !== nextProps.organization || this.state.updatingImage) {
       this.fetchAvatar(nextProps.organization);
       this.fetchBackground(nextProps.organization);
+      this.setState({updatingImage: false})
     }
   }
 
   componentWillUnmount() {
     this.props.dispatch(setOrganizationAvatar({}));
     this.props.dispatch(setOrganizationBackground({}));
+    this.setState({updatingImage: false})
+  }
+
+  updateImage(type) {
+    this.setState({updatingImage: true})
+    this.props.organization.get(type)
+      .then((image) => {
+        if (type === 'background') {
+          this.props.dispatch(setOrganizationBackground(image));
+        } else if (type === 'avatar') {
+          this.props.dispatch(setOrganizationAvatar(image));
+        }
+      })
+      .catch((error) => {
+        if (error.status !== 404) {
+          const notification = { status: 'critical', message: `${error.statusText}: ${error.message}` };
+          notificationHandler(this.props.dispatch, notification);
+        }
+      });
+
+    this.setState({updatingImage: false})
   }
 
   fetchAvatar(org) {
@@ -47,7 +74,9 @@ class EditDetailsContainer extends React.Component {
             notificationHandler(this.props.dispatch, notification);
           }
         });
+      this.setState({updatingImage: false})
     }
+
   }
 
   fetchBackground(org) {
@@ -62,10 +91,14 @@ class EditDetailsContainer extends React.Component {
             notificationHandler(this.props.dispatch, notification);
           }
         });
+      this.setState({updatingImage: false})
     }
   }
 
   handleMediaChange(type, file) {
+    if (type === 'background' || 'avatar') {
+      this.setState({ updatingImage: true })
+    }
     apiClient.post(this.props.organization._getURL(type), { media: { content_type: file.type } })
       .then(([resource]) => {
         const headers = new Headers();
@@ -75,31 +108,26 @@ class EditDetailsContainer extends React.Component {
           mode: 'cors',
           body: file
         };
-
         fetch(resource.src, params)
           .then((response) => {
             if (response.ok) {
               this.refreshOrganization(type)
-                .then(([organization]) => {
-                  this.props.dispatch(setCurrentOrganization(organization));
-                  if (type === 'avatar') {
-                    this.fetchAvatar(organization);
-                  }
-                  if (type === 'background') {
-                    this.fetchBackground(organization);
-                  }
-                });
+              .then(([organization]) => {
+                this.props.dispatch(setCurrentOrganization(organization));
+              });
             }
-          }).catch((error) => {
+          })
+          .catch((error) => {
             const notification = { status: 'critical', message: `${error.statusText}: ${error.message}` };
-
             notificationHandler(this.props.dispatch, notification);
           });
-      });
+        });
   }
 
-  refreshOrganization(resourceLinkToUncache) {
-    this.props.organization.uncacheLink(resourceLinkToUncache);
+  refreshOrganization(resourceTypeToUncache) {
+    this.props.organization.uncacheLink(resourceTypeToUncache);
+    this.updateImage(resourceTypeToUncache)
+    this.setState({updatingImage: false})
     return this.props.organization.refresh();
   }
 
