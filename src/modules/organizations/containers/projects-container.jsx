@@ -41,28 +41,32 @@ class ProjectsContainer extends React.Component {
     if (organization) {
       const query = { sort: 'display_name', page };
 
-      organization.get('projects', query).then((projects) => {
-        const allProjects = organization.links.projects.map((projectId) => {
-          const proj = projects.find(project => project.id === projectId);
-          if (proj) {
-            return proj;
-          }
-          return {
-            display_name: `Project ${projectId}`,
-            id: projectId,
-            links: {
-              owner: {
-                display_name: 'CHECK WITH OTHER ORG COLLABORATORS'
-              },
-            },
-          };
-        });
-        this.props.dispatch(setOrganizationProjects(allProjects));
-      }).catch((error) => {
-        const notification = { status: 'critical', message: `${error.statusText}: ${error.message}` };
+      // Isolate the project Ids associated with the organization
+      const projectIds = organization.links.projects;
 
-        notificationHandler(this.props.dispatch, notification);
-      });
+      organization.get('projects', query)
+        .then(projects => (
+          projectIds.map((projectId) => {
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+              return project;
+            }
+            return {
+              display_name: `Project ${projectId}`,
+              id: projectId,
+              links: {
+                owner: {
+                  display_name: 'CHECK WITH OTHER ORG COLLABORATORS'
+                },
+              },
+            };
+          })
+        ))
+        .then(allProjects => this.props.dispatch(setOrganizationProjects(allProjects)))
+        .catch((error) => {
+          const notification = { status: 'critical', message: `${error.statusText}: ${error.message}` };
+          notificationHandler(this.props.dispatch, notification);
+        });
     }
   }
 

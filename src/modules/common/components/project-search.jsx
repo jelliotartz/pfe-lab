@@ -8,7 +8,7 @@ const ProjectSearch = ({ clearable, onChange, value }) => {
       search: `%${input}%`
     };
 
-    if (!apiClient.params.admin === true) {
+    if (!apiClient.params.admin) {
       query.current_user_roles = ['collaborator', 'owner'];
     } else {
       query.launch_approved = null;
