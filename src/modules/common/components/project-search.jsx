@@ -5,14 +5,9 @@ import apiClient from 'panoptes-client/lib/api-client';
 const ProjectSearch = ({ clearable, onChange, value }) => {
   const getOptions = (input) => {
     const query = {
-      search: `%${input}%`
+      search: `%${input}%`,
+      current_user_roles: !apiClient.params.admin ? ['collaborator', 'owner'] : null
     };
-
-    if (!apiClient.params.admin) {
-      query.current_user_roles = ['collaborator', 'owner'];
-    } else {
-      query.launch_approved = null;
-    }
 
     return apiClient.type('projects').get(query, {
       page_size: 10,
