@@ -8,6 +8,10 @@ import bindInput from '../../common/containers/bind-input';
 import FormContainer from '../../common/containers/form-container';
 import CharLimit from '../../common/components/char-limit';
 
+import Form from 'grommet/components/Form';
+import FormFields from 'grommet/components/FormFields';
+import FormField from 'grommet/components/FormField';
+
 class DetailsFormContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -61,49 +65,65 @@ class DetailsFormContainer extends React.Component {
     const DescriptionInput = bindInput(organization.description, <input type="text" />);
     this.fields = {};
 
+    console.log(organization.urls)
+
     return (
       <div>
-        <FormContainer onSubmit={this.handleSubmit} onReset={this.resetOrganization}>
-          <fieldset className="form__fieldset">
-            <DisplayNameSlugEditor
-              resource={organization}
-              resourceType="organization"
-              ref={(node) => { this.fields.display_name = node; }}
-            />
-          </fieldset>
-          <fieldset className="form__fieldset">
-            <label className="form__label" htmlFor="description">
-              Description
-              <DescriptionInput
-                className="form__input form__input--full-width"
-                id="description"
-                ref={(node) => { this.fields.description = node; }}
-              />
-            </label>
-            <small className="form__help">
-              This should be a one-line call to action for your organization that displays on your landing page.
-              It will be displayed below the organization&apos;s name.{' '}
-              <CharLimit limit={300} string={this.props.organization.description || ''} />
-            </small>
-          </fieldset>
-          <fieldset className="form__fieldset">
-            <label className="form__label" htmlFor="introduction">
-              Introduction
-              <MarkdownEditor
-                id="introduction"
-                name="introduction"
-                onChange={this.handleTextAreaChange}
-                project={this.props.organization}
-                rows="10"
-                value={this.state.textarea}
-              />
-            </label>
-            <small className="form__help">
-              Add a brief introduction to get people interested in your organization.
-              This will display on your landing page.{' '}
-              <CharLimit limit={1500} string={this.state.textarea || ''} />
-            </small>
-          </fieldset>
+        <FormContainer onReset={this.resetOrganization}>
+          <Form onSubmit={this.handleSubmit}>
+
+            <FormFields>
+              <FormField>
+                <DisplayNameSlugEditor
+                  resource={organization}
+                  resourceType="organization"
+                  ref={(node) => { this.fields.display_name = node; }}
+                />
+              </FormField>
+            </FormFields>
+
+            <FormFields>
+              <FormField label="Description" htmlFor="description" help="This should be a one-line call to action for your organization that displays on your landing page. It will be displayed below the organization's name.">
+                <DescriptionInput
+                  className="form__input form__input--full-width"
+                  id="description"
+                  ref={(node) => { this.fields.description = node; }}
+                />
+                <CharLimit limit={300} string={this.props.organization.description || ''} />
+
+              </FormField>
+            </FormFields>
+
+            <FormFields>
+              <label className="form__label" htmlFor="introduction">
+                Introduction
+                <MarkdownEditor
+                  id="introduction"
+                  name="introduction"
+                  onChange={this.handleTextAreaChange}
+                  project={this.props.organization}
+                  rows="10"
+                  value={this.state.textarea}
+                />
+              </label>
+              <small className="form__help">
+                Add a brief introduction to get people interested in your organization.
+                This will display on your landing page.{' '}
+                <CharLimit limit={1500} string={this.state.textarea || ''} />
+              </small>
+            </FormFields>
+
+            <FormFields>
+              <label className="form__label" htmlFor="url-input">
+                url input
+                <div>this will be a Url Input component</div>
+              </label>
+              <small className="form__help">
+                explanatory text for Url Input
+              </small>
+            </FormFields>
+          </Form>
+
         </FormContainer>
       </div>
     );
