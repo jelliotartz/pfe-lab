@@ -6,35 +6,12 @@ import { config } from '../../../constants/config';
 import { setCurrentOrganization } from '../action-creators';
 import { organizationShape } from '../model';
 import MarkdownEditor from '../../common/components/markdown-editor';
+import cloneDeep from 'lodash.clonedeep';
+import Box from 'grommet/components/Box';
+import ExternalLinkRow from '../components/external-link-row';
 import bindInput from '../../common/containers/bind-input';
 import FormContainer from '../../common/containers/form-container';
 import CharLimit from '../../common/components/char-limit';
-
-// import only the clone deep method?
-import _ from 'lodash';
-import Box from 'grommet/components/Box';
-
-const ExternalLinkRow = ({ link, onLabelChange, onUrlChange, index }) =>
-  <Box direction="row">
-    <Box>
-      <input
-        type="text"
-        name={link.label}
-        value={link.label}
-        onChange={onLabelChange}
-      />
-    </Box>
-    <Box>
-      <input
-        type="text"
-        name={link.url}
-        value={link.url}
-        onChange={onUrlChange}
-      />
-    </Box>
-  </Box>
-
-
 
 class DetailsFormContainer extends React.Component {
   constructor(props) {
@@ -59,16 +36,14 @@ class DetailsFormContainer extends React.Component {
   }
 
   handleUrlChange(event, index) {
-    // create copy of this state links
-    const linksCopy = _.cloneDeep(this.state.links);
-    linksCopy[index].url = event.target.value; // this mutates state. bad!
+    const linksCopy = cloneDeep(this.state.links);
+    linksCopy[index].url = event.target.value;
     this.setState({ links: linksCopy });
   }
 
   handleLabelChange(event, index) {
-    // create copy of this state links
-    const linksCopy = _.cloneDeep(this.state.links)
-    linksCopy[index].label = event.target.value; // this mutates state. bad!
+    const linksCopy = cloneDeep(this.state.links);
+    linksCopy[index].label = event.target.value;
     this.setState({ links: linksCopy });
   }
 
@@ -152,23 +127,22 @@ class DetailsFormContainer extends React.Component {
               <CharLimit limit={1500} string={this.state.textarea || ''} />
             </small>
           </fieldset>
-
           <fieldset className="form__fieldset">
-            <label className="form__label">
+            <label className="form__label" htmlFor="urls">
               External Links
-              <Box size={{width: {max: 'medium'}}}>
-                <Box direction="row" margin={{top: 'small'}}>
-                  <Box style={{minWidth: '110px', textAlign: 'center'}}>Label</Box>
-                  <Box style={{minWidth: '110px', textAlign: 'center'}}>Url</Box>
+              <Box size={{ width: { max: 'medium' } }}>
+                <Box direction="row" margin={{ top: 'small' }}>
+                  <Box style={{ minWidth: '110px', textAlign: 'center' }}>Label</Box>
+                  <Box style={{ minWidth: '110px', textAlign: 'center' }}>Url</Box>
                 </Box>
                 {this.state.links && this.state.links.map((link, index) =>
-                  <ExternalLinkRow
+                  (<ExternalLinkRow
                     key={`external-link-${index}`}
                     link={link}
                     index={index}
-                    onLabelChange={(event) => this.handleLabelChange(event, index)}
-                    onUrlChange={(event) => this.handleUrlChange(event, index)}
-                  />
+                    onLabelChange={event => this.handleLabelChange(event, index)}
+                    onUrlChange={event => this.handleUrlChange(event, index)}
+                  />)
                 )}
               </Box>
             </label>
@@ -177,22 +151,22 @@ class DetailsFormContainer extends React.Component {
               the about, classify, talk, and collect tabs.
             </small>
           </fieldset>
-
         </FormContainer>
       </div>
     );
   }
 }
 
-
 DetailsFormContainer.defaultProps = {
+  dispatch: () => {},
   organization: {},
+  updateOrganization: () => {},
 };
 
 DetailsFormContainer.propTypes = {
   dispatch: PropTypes.func,
   organization: organizationShape,
-  updateOrganization: React.PropTypes.func
+  updateOrganization: React.PropTypes.func,
 };
 
 function mapStateToProps(state) {
