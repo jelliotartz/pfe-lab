@@ -12,6 +12,7 @@ import ExternalLinkRow from '../components/external-link-row';
 import bindInput from '../../common/containers/bind-input';
 import FormContainer from '../../common/containers/form-container';
 import CharLimit from '../../common/components/char-limit';
+import notificationHandler from '../../../lib/notificationHandler';
 
 class DetailsFormContainer extends React.Component {
   constructor(props) {
@@ -24,10 +25,15 @@ class DetailsFormContainer extends React.Component {
 
     this.handleUrlChange = this.handleUrlChange.bind(this);
     this.handleLabelChange = this.handleLabelChange.bind(this);
+    this.handleAddExternalLink = this.handleAddExternalLink.bind(this);
 
     this.state = {
       textarea: '',
-      links: this.props.organization.urls
+      links: this.props.organization.urls,
+      linkToAdd: {
+        url: 'https://example.com/',
+        label: 'Example'
+      }
     };
   }
 
@@ -45,6 +51,54 @@ class DetailsFormContainer extends React.Component {
     const linksCopy = cloneDeep(this.state.links);
     linksCopy[index].label = event.target.value;
     this.setState({ links: linksCopy });
+  }
+
+  // currently not working
+  handleAddExternalLink() {
+    const newLink = this.state.linkToAdd;
+
+    const linksCopy = cloneDeep(this.state.links);
+    linksCopy.push(newLink);
+    this.setState({ links: linksCopy }); // this does not replace this.state.links with linksCopy. why?
+                                         // is it happening async?
+    // debugger;
+    // this.props.updateOrganization(this.props.organization)
+    //   .then(([organization]) => {
+    //     this.props.dispatch(setCurrentOrganization(organization));
+    //   })
+    //   .catch((error) => {
+    //     const notification = { status: 'critical', message: `${error.statusText}: ${error.message}` };
+
+    //     notificationHandler(this.props.dispatch, notification);
+    //   });
+
+    // const changes = {
+    //   url: 'https://example.com/',
+    //   label: 'Example'
+    // };
+
+
+    // this.props.updateOrganization(this.props.organization);
+  }
+
+  // currently not working
+  handleRemoveLink(linkToRemove, index) {
+    const urlList = this.props.organization.urls.slice();
+    const indexToRemove = urlList.findIndex(i => (i === linkToRemove));
+    if (indexToRemove > -1) {
+      urlList.splice(indexToRemove, 1);
+      const changes = {
+        urls: urlList
+      };
+
+      const linksCopy = cloneDeep(this.state.links);
+      // linksCopy.push(changes);
+      linksCopy.splice(0, linksCopy.length, ...changes.urls);
+      this.setState({ links: linksCopy });
+
+    }
+
+    this.props.updateOrganization(patch);
   }
 
   handleTextAreaChange(event) {
@@ -127,6 +181,7 @@ class DetailsFormContainer extends React.Component {
               <CharLimit limit={1500} string={this.state.textarea || ''} />
             </small>
           </fieldset>
+
           <fieldset className="form__fieldset">
             <label className="form__label" htmlFor="urls">
               External Links
@@ -142,15 +197,20 @@ class DetailsFormContainer extends React.Component {
                     index={index}
                     onLabelChange={event => this.handleLabelChange(event, index)}
                     onUrlChange={event => this.handleUrlChange(event, index)}
+                    onRemoveLink={this.handleRemoveLink.bind(this, link)}
+                    onSubmit={this.handleSubmit}
                   />)
                 )}
               </Box>
             </label>
+            <button type="button" onClick={this.handleAddExternalLink.bind(this)}>Add a link</button>
+            <br />
             <small className="form__help">
               Adding an external link will make it appear as a new tab alongside
               the about, classify, talk, and collect tabs.
             </small>
           </fieldset>
+
         </FormContainer>
       </div>
     );

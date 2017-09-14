@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Box from 'grommet/components/Box';
 
-const ExternalLinkRow = ({ link, onLabelChange, onUrlChange }) =>
+const ExternalLinkRow = ({ link, onLabelChange, onUrlChange, onRemoveLink }) =>
   (<Box direction="row">
     <Box>
       <input
@@ -20,6 +20,9 @@ const ExternalLinkRow = ({ link, onLabelChange, onUrlChange }) =>
         onChange={onUrlChange}
       />
     </Box>
+    <button type="button">
+      <i className="fa fa-remove" onClick={onRemoveLink}/>
+    </button>
   </Box>);
 
 ExternalLinkRow.defaultProps = {
