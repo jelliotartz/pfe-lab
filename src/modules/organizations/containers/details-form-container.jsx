@@ -13,6 +13,7 @@ import bindInput from '../../common/containers/bind-input';
 import FormContainer from '../../common/containers/form-container';
 import CharLimit from '../../common/components/char-limit';
 import notificationHandler from '../../../lib/notificationHandler';
+import ExternalLinkEditor from './external-link-editor';
 
 class DetailsFormContainer extends React.Component {
   constructor(props) {
@@ -26,6 +27,7 @@ class DetailsFormContainer extends React.Component {
     this.handleUrlChange = this.handleUrlChange.bind(this);
     this.handleLabelChange = this.handleLabelChange.bind(this);
     this.handleAddExternalLink = this.handleAddExternalLink.bind(this);
+    this.handleRemoveLink = this.handleRemoveLink.bind(this);
 
     this.state = {
       textarea: '',
@@ -61,7 +63,18 @@ class DetailsFormContainer extends React.Component {
     linksCopy.push(newLink);
     this.setState({ links: linksCopy }); // this does not replace this.state.links with linksCopy. why?
                                          // is it happening async?
+    console.log(this.props.organization);
     // debugger;
+    const result = {};
+    Object.keys(this.props.organization).forEach((fieldName) => { // Object.keys(this.props.organization) is not working
+      // debugger;
+      result[fieldName] = this.props.organization[fieldName].value();
+    });
+    result.introduction = this.state.textarea;
+    result.urls = this.state.links;
+
+    this.props.updateOrganization(result);
+
     // this.props.updateOrganization(this.props.organization)
     //   .then(([organization]) => {
     //     this.props.dispatch(setCurrentOrganization(organization));
@@ -198,12 +211,11 @@ class DetailsFormContainer extends React.Component {
                     onLabelChange={event => this.handleLabelChange(event, index)}
                     onUrlChange={event => this.handleUrlChange(event, index)}
                     onRemoveLink={this.handleRemoveLink.bind(this, link)}
-                    onSubmit={this.handleSubmit}
                   />)
                 )}
               </Box>
             </label>
-            <button type="button" onClick={this.handleAddExternalLink.bind(this)}>Add a link</button>
+            <button type="button" onClick={this.handleAddExternalLink}>Add a link</button>
             <br />
             <small className="form__help">
               Adding an external link will make it appear as a new tab alongside
