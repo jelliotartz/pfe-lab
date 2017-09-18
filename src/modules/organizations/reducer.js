@@ -23,6 +23,16 @@ export default function (state = initialState, action) { // eslint-disable-line 
       return { organizationAvatar: action.organizationAvatar };
     case types.SET_ORGANIZATION_BACKGROUND:
       return { organizationBackground: action.organizationBackground };
+    case types.SET_ORGANIZATION_EXTERNAL_LINK_LABEL:
+      return { organizationUrls: action.organizationUrls };
+    case types.SET_ORGANIZATION_EXTERNAL_LINK_URL:
+      return { organizationUrls: action.organizationUrls };
+    case types.SET_ORGANIZATION_SOCIAL_LINK_PATH:
+      return { organizationUrls: action.organizationUrls };
+    case types.SET_ORGANIZATION_SOCIAL_ORDER:
+      return { socialOrder: action.socialOrder };
+    case types.SET_ORGANIZATION_URLS:
+      return { organizationUrls: action.organizationUrls };
     default:
       return state;
   }

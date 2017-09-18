@@ -69,3 +69,42 @@ export function setOrganizationBackground(organizationBackground) {
     organizationBackground
   };
 }
+
+export function setOrganizationExternalLinkUrl({ organizationUrls }) {
+  return {
+    type: types.SET_ORGANIZATION_EXTERNAL_LINK_URL,
+    organizationUrls
+  };
+}
+
+export function setOrganizationExternalLinkLabel({ organizationUrls }) {
+  return {
+    type: types.SET_ORGANIZATION_EXTERNAL_LINK_LABEL,
+    organizationUrls
+    // labelValue,
+    // urls,
+    // link
+  };
+}
+
+export function setOrganizationSocialLinkPath({ organizationUrls }) {
+  return {
+    type: types.SET_ORGANIZATION_SOCIAL_LINK_PATH,
+    organizationUrls
+  };
+}
+
+export function setOrganizationSocialOrder({ socialOrder }) {
+  return {
+    type: types.SET_ORGANIZATION_SOCIAL_ORDER,
+    socialOrder
+  };
+}
+
+export function setOrganizationUrls({ organizationUrls }) {
+  return {
+    type: types.SET_ORGANIZATION_URLS,
+    organizationUrls
+  }
+}
+

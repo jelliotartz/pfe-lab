@@ -5,7 +5,7 @@ import rootReducer from './reducers';
 
 const createStoreWithMiddleware = applyMiddleware(
   thunkMiddleware,
-  // createLogger(), // ARB: i turned this off because it was too noisy; use redux-devtools extension
+  createLogger(), // ARB: i turned this off because it was too noisy; use redux-devtools extension
 )(createStore);
 
 export default function configureStore(initialState) {

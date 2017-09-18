@@ -15,7 +15,9 @@ const initialState = {
   organizationProjects: [],
   organizationRoles: null,
   organizationsAvatars: [],
+  organizationUrls: null,
   ownedOrganizations: [],
+  socialOrder: null,
   user: null,
 };
 

@@ -6,7 +6,6 @@ import { config } from '../../../constants/config';
 import { setCurrentOrganization } from '../action-creators';
 import { organizationShape } from '../model';
 import MarkdownEditor from '../../common/components/markdown-editor';
-import cloneDeep from 'lodash.clonedeep';
 import Box from 'grommet/components/Box';
 import ExternalLinkRow from '../components/external-link-row';
 import bindInput from '../../common/containers/bind-input';
@@ -14,6 +13,7 @@ import FormContainer from '../../common/containers/form-container';
 import CharLimit from '../../common/components/char-limit';
 import notificationHandler from '../../../lib/notificationHandler';
 import ExternalLinkEditor from './external-link-editor';
+import SocialLinkEditor from './social-link-editor';
 
 class DetailsFormContainer extends React.Component {
   constructor(props) {
@@ -24,94 +24,15 @@ class DetailsFormContainer extends React.Component {
     this.handleTextAreaChange = this.handleTextAreaChange.bind(this);
     this.resetOrganization = this.resetOrganization.bind(this);
 
-    this.handleUrlChange = this.handleUrlChange.bind(this);
-    this.handleLabelChange = this.handleLabelChange.bind(this);
-    this.handleAddExternalLink = this.handleAddExternalLink.bind(this);
-    this.handleRemoveLink = this.handleRemoveLink.bind(this);
-
     this.state = {
-      textarea: '',
-      links: this.props.organization.urls,
-      linkToAdd: {
-        url: 'https://example.com/',
-        label: 'Example'
-      }
+      textarea: ''
     };
   }
 
   componentDidMount() {
-    this.setState({ textarea: this.props.organization.introduction });
-  }
-
-  handleUrlChange(event, index) {
-    const linksCopy = cloneDeep(this.state.links);
-    linksCopy[index].url = event.target.value;
-    this.setState({ links: linksCopy });
-  }
-
-  handleLabelChange(event, index) {
-    const linksCopy = cloneDeep(this.state.links);
-    linksCopy[index].label = event.target.value;
-    this.setState({ links: linksCopy });
-  }
-
-  // currently not working
-  handleAddExternalLink() {
-    const newLink = this.state.linkToAdd;
-
-    const linksCopy = cloneDeep(this.state.links);
-    linksCopy.push(newLink);
-    this.setState({ links: linksCopy }); // this does not replace this.state.links with linksCopy. why?
-                                         // is it happening async?
-    console.log(this.props.organization);
-    // debugger;
-    const result = {};
-    Object.keys(this.props.organization).forEach((fieldName) => { // Object.keys(this.props.organization) is not working
-      // debugger;
-      result[fieldName] = this.props.organization[fieldName].value();
+    this.setState({
+      textarea: this.props.organization.introduction,
     });
-    result.introduction = this.state.textarea;
-    result.urls = this.state.links;
-
-    this.props.updateOrganization(result);
-
-    // this.props.updateOrganization(this.props.organization)
-    //   .then(([organization]) => {
-    //     this.props.dispatch(setCurrentOrganization(organization));
-    //   })
-    //   .catch((error) => {
-    //     const notification = { status: 'critical', message: `${error.statusText}: ${error.message}` };
-
-    //     notificationHandler(this.props.dispatch, notification);
-    //   });
-
-    // const changes = {
-    //   url: 'https://example.com/',
-    //   label: 'Example'
-    // };
-
-
-    // this.props.updateOrganization(this.props.organization);
-  }
-
-  // currently not working
-  handleRemoveLink(linkToRemove, index) {
-    const urlList = this.props.organization.urls.slice();
-    const indexToRemove = urlList.findIndex(i => (i === linkToRemove));
-    if (indexToRemove > -1) {
-      urlList.splice(indexToRemove, 1);
-      const changes = {
-        urls: urlList
-      };
-
-      const linksCopy = cloneDeep(this.state.links);
-      // linksCopy.push(changes);
-      linksCopy.splice(0, linksCopy.length, ...changes.urls);
-      this.setState({ links: linksCopy });
-
-    }
-
-    this.props.updateOrganization(patch);
   }
 
   handleTextAreaChange(event) {
@@ -127,7 +48,7 @@ class DetailsFormContainer extends React.Component {
       result[fieldName] = this.fields[fieldName].value();
     });
     result.introduction = this.state.textarea;
-    result.urls = this.state.links;
+    result.urls = this.props.organizationUrls;
 
     return result;
   }
@@ -195,33 +116,8 @@ class DetailsFormContainer extends React.Component {
             </small>
           </fieldset>
 
-          <fieldset className="form__fieldset">
-            <label className="form__label" htmlFor="urls">
-              External Links
-              <Box size={{ width: { max: 'medium' } }}>
-                <Box direction="row" margin={{ top: 'small' }}>
-                  <Box style={{ minWidth: '110px', textAlign: 'center' }}>Label</Box>
-                  <Box style={{ minWidth: '110px', textAlign: 'center' }}>Url</Box>
-                </Box>
-                {this.state.links && this.state.links.map((link, index) =>
-                  (<ExternalLinkRow
-                    key={`external-link-${index}`}
-                    link={link}
-                    index={index}
-                    onLabelChange={event => this.handleLabelChange(event, index)}
-                    onUrlChange={event => this.handleUrlChange(event, index)}
-                    onRemoveLink={this.handleRemoveLink.bind(this, link)}
-                  />)
-                )}
-              </Box>
-            </label>
-            <button type="button" onClick={this.handleAddExternalLink}>Add a link</button>
-            <br />
-            <small className="form__help">
-              Adding an external link will make it appear as a new tab alongside
-              the about, classify, talk, and collect tabs.
-            </small>
-          </fieldset>
+          <ExternalLinkEditor organization={organization} />
+          <SocialLinkEditor organization={organization} />
 
         </FormContainer>
       </div>
@@ -244,6 +140,7 @@ DetailsFormContainer.propTypes = {
 function mapStateToProps(state) {
   return {
     organization: state.organization,
+    organizationUrls: state.organizationUrls || state.organization.urls,
   };
 }
 
