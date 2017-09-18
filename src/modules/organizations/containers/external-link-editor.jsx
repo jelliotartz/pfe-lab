@@ -3,8 +3,8 @@ import DragReorderable from 'drag-reorderable';
 import Box from 'grommet/components/Box';
 import ExternalLinkRow from '../components/external-link-row';
 import { connect } from 'react-redux';
-import { setOrganizationExternalLinkUrl, setOrganizationExternalLinkLabel } from '../action-creators';
-import cloneDeep from 'lodash.clonedeep';
+import { setOrganizationExternalLinkUrl, setOrganizationExternalLinkLabel, setOrganizationUrls, setOrganizationExternalOrder } from '../action-creators';
+import { difference, sortBy, intersection, filter, chain, cloneDeep } from 'lodash';
 
 class ExternalLinkEditor extends React.Component {
 
@@ -18,33 +18,117 @@ class ExternalLinkEditor extends React.Component {
 
     this.state = {
       links: [],
-      linkToAdd: {
-        url: 'https://example.com/',
-        label: 'Example'
-      }
+      externalOrder: []
     }
   }
 
   componentDidMount() {
-    this.setState({
-      links: this.props.organizationUrls
-    });
+    this.setInitialPositions();
+    this.createExternalOrder();
+    this.setState({ links: this.props.organizationUrls });
   }
 
   handleAddLink() {
-    const newLink = this.state.linkToAdd;
+    const newLink = {
+      url: 'https://example.com/',
+      label: 'Example',
+      position: this.state.externalOrder.length
+    }
+
+    const orderedExternalLinks = chain(this.state.links)
+      .filter(url => !url.path)
+      .sortBy('position')
+      .value()
+
+    orderedExternalLinks.push(newLink);
+
+    // this.setInitialPositions();
 
     const linksCopy = cloneDeep(this.state.links);
     linksCopy.push(newLink);
     this.setState({ links: linksCopy });
+
+    this.props.dispatch(setOrganizationUrls({ organizationUrls: linksCopy }))
+
+
+    this.setState({ externalOrder: orderedExternalLinks });
+    this.props.dispatch(setOrganizationExternalOrder({ externalOrder: orderedExternalLinks }));
+    this.createExternalOrder();
   }
 
+  handleLabelChange(event, index) {
+    // debugger;
+    // if (index < 0) {
+    //   index = this.props.organizationUrls.length
+    // }
+
+    const linksCopy = cloneDeep(this.state.links);
+    linksCopy[index].label = event.target.value;
+    // debugger;
+    this.setState({ links: linksCopy });
+
+    this.props.dispatch(setOrganizationExternalLinkLabel({ organizationUrls: linksCopy }))
+  }
+
+  indexFinder(toSearch, toFind) {
+    return toSearch.findIndex(i => (i.url === toFind));
+  }
+
+  // sets initial positions for both external and social links
+  setInitialPositions() {
+    const socialLinks = this.props.organizationUrls.filter(url => url.path)
+    const externalUrls = this.props.organizationUrls.filter(url => !url.path)
+
+    const sortedSocialLinks = sortBy(socialLinks, 'position')
+    const positionedSocialLinks = sortedSocialLinks.map((link, index) => {
+      return Object.assign(link, { position: index })
+    })
+
+    const sortedExternalLinks = sortBy(externalUrls, 'position');
+    const positionedExternalLinks = sortedExternalLinks.map((link, index) => {
+      return Object.assign(link, { position: index })
+    })
+
+    this.props.dispatch(setOrganizationUrls({ organizationUrls: [...positionedSocialLinks, ...externalUrls]}))
+  }
+
+
+  // Extract the external urls and sort them by position
+  createExternalOrder() {
+    const orderedExternalLinks = chain(this.props.organizationUrls)
+      .filter(url => !url.path)
+      .sortBy('position')
+      .value()
+
+    this.setState({ externalOrder: orderedExternalLinks });
+    this.props.dispatch(setOrganizationExternalOrder({ externalOrder: orderedExternalLinks }));
+  }
+
+  // handleLinkReorder(newLinkOrder) {
+  //   const socialUrls = this.state.links.filter(url => url.path);
+  //   const urls = newLinkOrder.concat(socialUrls);
+  //   this.setState({ links: urls });
+  //   this.props.dispatch(setOrganizationUrls({ organizationUrls: urls }))
+  // }
+
   handleLinkReorder(newLinkOrder) {
-    if (this.state.links) {
-      const socialUrls = this.state.links.filter(url => url.path);
-      const urls = newLinkOrder.concat(socialUrls);
-      this.setState({ links: urls });
-    }
+    // Filter out the links that don't have values set.
+    const setSocialUrls = this.props.organizationUrls.filter(url => url.path).map(url => url.site);
+    const externalUrls = this.props.organizationUrls.filter(url => !url.path)
+
+    // Create an array of site values that are included in newLinkOrder and setSocialUrls.
+    // The order of sites is determined by newLinkOrder.
+    const newLinks = intersection(newLinkOrder, setSocialUrls)
+
+    // Iterate over the new links, find the target url in this.props.organizaitonUrls, and update its position
+    const newUrls = newLinks.map((link, index) => {
+      const targetUrl = this.props.organizationUrls.find(url => url.site === link)
+      return Object.assign(targetUrl, {position: newLinkOrder.indexOf(link)})
+    })
+
+    // update redux store with new positions for organizationUrls
+    this.props.dispatch(setOrganizationUrls({ organizationUrls: [...newUrls, ...externalUrls]}))
+    this.createSocialOrder(newLinkOrder)
   }
 
   handleRemoveLink(event, index) {
@@ -61,13 +145,7 @@ class ExternalLinkEditor extends React.Component {
     this.props.dispatch(setOrganizationExternalLinkUrl({ organizationUrls: linksCopy }))
   }
 
-  handleLabelChange(event, index) {
-    const linksCopy = cloneDeep(this.state.links);
-    linksCopy[index].label = event.target.value;
-    this.setState({ links: linksCopy });
 
-    this.props.dispatch(setOrganizationExternalLinkLabel({ organizationUrls: linksCopy }))
-  }
 
   handleDisableDrag(event) {
     event.target.parentElement.parentElement.parentElement.setAttribute('draggable', false);
@@ -142,7 +220,7 @@ class ExternalLinkEditor extends React.Component {
           ? this.renderTable(this.props.organizationUrls)
           : null}
 
-          <button type="button" onClick={this.handleAddLink}>Add a link</button>
+          <button type="button" onClick={this.handleAddLink.bind(this)}>Add a link</button>
       </div>
     );
   }

@@ -81,9 +81,6 @@ export function setOrganizationExternalLinkLabel({ organizationUrls }) {
   return {
     type: types.SET_ORGANIZATION_EXTERNAL_LINK_LABEL,
     organizationUrls
-    // labelValue,
-    // urls,
-    // link
   };
 }
 
@@ -105,6 +102,13 @@ export function setOrganizationUrls({ organizationUrls }) {
   return {
     type: types.SET_ORGANIZATION_URLS,
     organizationUrls
-  }
+  };
+}
+
+export function setOrganizationExternalOrder({ externalOrder }) {
+  return {
+    type: types.SET_ORGANIZATION_EXTERNAL_ORDER,
+    externalOrder
+  };
 }
 

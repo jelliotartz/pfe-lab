@@ -1,8 +1,7 @@
 import React from 'react';
 import SOCIAL_ICONS from '../../../lib/social-icons';
 import DragReorderable from 'drag-reorderable';
-import cloneDeep from 'lodash.clonedeep';
-import { difference, sortBy, intersection, filter, chain } from 'lodash';
+import { difference, sortBy, intersection, filter, chain, cloneDeep } from 'lodash';
 import { connect } from 'react-redux';
 import { setOrganizationSocialLinkPath, setOrganizationSocialOrder, setOrganizationUrls } from '../action-creators';
 
@@ -29,12 +28,18 @@ class SocialLinkEditor extends React.Component {
     this.setState({ links: this.props.organizationUrls })
   }
 
+  // sets initial positions for both external and social links
   setInitialPositions() {
     const socialLinks = this.props.organizationUrls.filter(url => url.path)
     const externalUrls = this.props.organizationUrls.filter(url => !url.path)
 
     const sortedSocialLinks = sortBy(socialLinks, 'position')
     const positionedSocialLinks = sortedSocialLinks.map((link, index) => {
+      return Object.assign(link, { position: index })
+    })
+
+    const sortedExternalLinks = sortBy(externalUrls, 'position');
+    const positionedExternalLinks = sortedExternalLinks.map((link, index) => {
       return Object.assign(link, { position: index })
     })
 
@@ -76,6 +81,7 @@ class SocialLinkEditor extends React.Component {
       const linksCopy = cloneDeep(this.state.links);
       linksCopy[index] = changes;
       this.setState({ links: linksCopy });
+
       this.props.dispatch(setOrganizationSocialLinkPath({ organizationUrls: linksCopy }))
     } else {
       this.handleRemoveLink(site);
@@ -85,13 +91,13 @@ class SocialLinkEditor extends React.Component {
   handleLinkReorder(newLinkOrder) {
     // Filter out the links that don't have values set.
     const setSocialUrls = this.props.organizationUrls.filter(url => url.path).map(url => url.site);
-    const externalUrls = this.props.organizationUrls.filter(url => !url.path)
+    const externalUrls = this.props.organizationUrls.filter(url => !url.path);
 
     // Create an array of site values that are included in newLinkOrder and setSocialUrls.
     // The order of sites is determined by newLinkOrder.
     const newLinks = intersection(newLinkOrder, setSocialUrls)
 
-    // Iterate over the new links, find the target url in this.props.organizaitonUrls, and update its position
+    // Iterate over the new links, find the target url in this.props.organizationUrls, and update its position
     const newUrls = newLinks.map((link, index) => {
       const targetUrl = this.props.organizationUrls.find(url => url.site === link)
       return Object.assign(targetUrl, {position: newLinkOrder.indexOf(link)})

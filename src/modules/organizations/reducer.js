@@ -33,6 +33,8 @@ export default function (state = initialState, action) { // eslint-disable-line 
       return { socialOrder: action.socialOrder };
     case types.SET_ORGANIZATION_URLS:
       return { organizationUrls: action.organizationUrls };
+    case types.SET_ORGANIZATION_EXTERNAL_ORDER:
+      return { externalOrder: action.externalOrder };
     default:
       return state;
   }

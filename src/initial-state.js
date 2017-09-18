@@ -18,6 +18,7 @@ const initialState = {
   organizationUrls: null,
   ownedOrganizations: [],
   socialOrder: null,
+  externalOrder: null,
   user: null,
 };
 
