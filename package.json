@@ -45,6 +45,7 @@
     "classnames": "~2.2.5",
     "counterpart": "~0.18.0",
     "data-uri-to-blob": "~0.0.4",
+    "drag-reorderable": "~0.1.0",
     "grommet": "^1.4.0",
     "history": "~4.4.1",
     "markdownz": "~7.3.0",
